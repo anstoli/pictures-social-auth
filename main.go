@@ -159,6 +159,11 @@ func logInReturn(ctx context.Context, conf *oauth2.Config, jwtTokenTransformer *
 			"Token": token,
 			"Email": u.Email,
 		}
-		authSaverPage.Execute(w, v)
+		err = authSaverPage.Execute(w, v)
+		if err != nil {
+			log.Print(err)
+			http.Error(w, "Server logic error.", http.StatusInternalServerError)
+			return
+		}
 	}
 }
