@@ -21,6 +21,7 @@ var (
 	jwtSigningPublicKey  = flag.String("jwt-sig-public", "/etc/auth/jwt/jwk_sig_RS512_prod.pub", "Location of public key for validating JWTs. The key should be RSA SHA 512 key in JWK format.")
 	jwtSigningPrivateKey = flag.String("jwt-sig-private", "/etc/auth/jwt/jwk_sig_RS512_prod", "Location of private key for signing JWTs. The key should be RSA SHA 512 key in JWK format.")
 	googleOauthConfig = flag.String("google-oauth-config", "/etc/auth/google/google_oauth_config.json", "Location of Google Oauth config file in JSON format.")
+	siteMainUrl = flag.String("site-main-url", "http://localhost:3000", "Absolute path of the site.")
 )
 
 func main() {
@@ -158,6 +159,7 @@ func logInReturn(ctx context.Context, conf *oauth2.Config, jwtTokenTransformer *
 		v := map[string]string{
 			"Token": token,
 			"Email": u.Email,
+			"SiteMainUrl": *siteMainUrl,
 		}
 		err = authSaverPage.Execute(w, v)
 		if err != nil {

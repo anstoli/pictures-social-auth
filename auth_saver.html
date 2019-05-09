@@ -6,7 +6,7 @@
   <script>
     localStorage.setItem('auth-token', '{{.Token}}');
     localStorage.setItem('user-email', '{{.Email}}');
-    window.location.replace("/");
+    window.location.replace('{{.SiteMainUrl}}');
   </script>
 </head>
 <body>
