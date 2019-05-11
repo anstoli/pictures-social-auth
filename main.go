@@ -22,6 +22,7 @@ var (
 	jwtSigningPrivateKey = flag.String("jwt-sig-private", "/etc/auth/jwt/jwk_sig_RS512_prod", "Location of private key for signing JWTs. The key should be RSA SHA 512 key in JWK format.")
 	googleOauthConfig = flag.String("google-oauth-config", "/etc/auth/google/google_oauth_config.json", "Location of Google Oauth config file in JSON format.")
 	siteMainUrl = flag.String("site-main-url", "http://localhost:3000", "Absolute path of the site.")
+	googleAuthReturnUrl = flag.String("google-auth-return-url", "http://127.0.0.1:81", "Host of Google auth return url.")
 )
 
 func main() {
@@ -69,7 +70,12 @@ func googleConfigFromJsonFile(file string) (*oauth2.Config, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return google.ConfigFromJSON(data, "https://www.googleapis.com/auth/userinfo.email", "openid")
+	c, err := google.ConfigFromJSON(data, "https://www.googleapis.com/auth/userinfo.email", "openid")
+	if err != nil {
+		return nil, err
+	}
+	c.RedirectURL = *googleAuthReturnUrl + "/auth/google/return"
+	return c, nil
 }
 
 func createHttpServer(googleOauthContext context.Context, googleOauthConf *oauth2.Config, jwtTokenTransformer *jwt.TokenTransformer) error {
