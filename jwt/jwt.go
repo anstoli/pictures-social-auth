@@ -12,18 +12,16 @@ type TokenTransformer struct {
 	sigPrivKey jose.SigningKey
 }
 
-type PicturesClaims struct {
-	*jwt.Claims
-	Email string
-}
-
-type Data struct {
-	Email string
-}
-
 type Config struct {
 	SigPublicKey []byte
 	SigPrivateKey []byte
+}
+
+type PicturesClaims struct {
+	*jwt.Claims
+	Email string
+	CsrfTokenHash string
+	Role string
 }
 
 func New(conf *Config) (*TokenTransformer, error) {
@@ -62,17 +60,13 @@ func loadKey(json []byte) (*jose.JSONWebKey, error) {
 	return &jwk, nil
 }
 
-func (tt *TokenTransformer) Encode(d *Data) (string, error) {
-	c := &PicturesClaims{
-		Claims: &jwt.Claims{},
-		Email: d.Email,
-	}
+func (tt *TokenTransformer) Encode(c *PicturesClaims) (string, error) {
 	builder := jwt.Signed(tt.signer)
 	builder = builder.Claims(c)
 	return builder.CompactSerialize()
 }
 
-func (tt *TokenTransformer) Decode(token string) (*Data, error) {
+func (tt *TokenTransformer) Decode(token string) (*PicturesClaims, error) {
 	parsed, err := jwt.ParseSigned(token)
 	// TODO: double check if alg should be checked manually to be not "none"
 	if err != nil {
@@ -80,8 +74,5 @@ func (tt *TokenTransformer) Decode(token string) (*Data, error) {
 	}
 	c := &PicturesClaims{}
 	err = parsed.Claims(tt.sigPubKey.Key, c)
-	if err != nil {
-		return nil, err
-	}
-	return &Data{Email: c.Email}, nil
+	return c, err
 }
