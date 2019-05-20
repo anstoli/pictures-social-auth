@@ -34,6 +34,7 @@ var (
 
 func main() {
 	setLogger()
+	log.Print("Starting social-auth-service...")
 	flag.Parse()
 
 	googleCfg, err := googleConfigFromJsonFile(*googleOauthConfig)
@@ -168,11 +169,13 @@ func logInReturn(ctx context.Context, conf *oauth2.Config, jwtTokenTransformer *
 		_ = q.Get("state")
 		code := q.Get("code")
 		if code == "" {
+			log.Print("code parameter is empty")
 			http.Error(w, "Request should have 'code' request parameter", http.StatusBadRequest)
 			return
 		}
 		tok, err := conf.Exchange(ctx, code)
 		if err != nil {
+			log.Print(err)
 			http.Error(w, "Error requesting user info. Please retry later.", http.StatusInternalServerError)
 			return
 		}
